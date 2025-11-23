@@ -1,0 +1,245 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+    color: #00d9ff;
+    min-height: 100vh;
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 217, 255, 0.03) 2px, rgba(0, 217, 255, 0.03) 4px);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: rgba(0, 10, 30, 0.9);
+    border: 3px solid #00d9ff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 0 30px rgba(0, 217, 255, 0.5), inset 0 0 50px rgba(0, 217, 255, 0.1);
+    position: relative;
+    z-index: 2;
+}
+
+.top-secret {
+    text-align: center;
+    color: #ff3366;
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: 5px;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px #ff3366;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+h1 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px #00d9ff;
+    color: #00d9ff;
+}
+
+.agent-name {
+    text-align: center;
+    font-size: 32px;
+    color: #00d9ff;
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(0, 217, 255, 0.15);
+    border: 2px solid #00d9ff;
+    border-radius: 5px;
+    text-shadow: 0 0 10px #00d9ff;
+}
+
+.mission-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+}
+
+.mission-table th {
+    background: rgba(0, 217, 255, 0.2);
+    padding: 15px;
+    text-align: left;
+    border: 2px solid #00d9ff;
+    font-size: 18px;
+    color: #00d9ff;
+}
+
+.mission-table td {
+    padding: 15px;
+    border: 2px solid #00d9ff;
+    font-size: 16px;
+}
+
+.mission-name {
+    color: #66e0ff;
+}
+
+.stamp-cell {
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: rgba(0, 100, 150, 0.1);
+    position: relative;
+}
+
+.stamp-cell:hover {
+    background: rgba(0, 150, 200, 0.25);
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+}
+
+.stamp {
+    width: 80px;
+    height: 80px;
+    display: inline-block;
+    animation: stampAppear 0.5s ease-out;
+    transform: rotate(-15deg);
+}
+
+.stamp svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 8px #00ff88);
+}
+
+@keyframes stampAppear {
+    0% {
+        transform: scale(0) rotate(-15deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2) rotate(-15deg);
+    }
+    100% {
+        transform: scale(1) rotate(-15deg);
+        opacity: 1;
+    }
+}
+
+.footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 14px;
+    color: #888;
+}
+
+.click-hint {
+    color: #999;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Styly pro registrační formulář */
+.form-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.input-group {
+    margin-bottom: 25px;
+}
+
+.input-group label {
+    display: block;
+    color: #00d9ff;
+    font-size: 18px;
+    margin-bottom: 10px;
+    text-shadow: 0 0 5px #00d9ff;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    background: rgba(0, 50, 100, 0.3);
+    border: 2px solid #00d9ff;
+    border-radius: 5px;
+    color: #00d9ff;
+    font-family: 'Courier New', monospace;
+    transition: all 0.3s;
+}
+
+.input-group input:focus {
+    outline: none;
+    background: rgba(0, 50, 100, 0.5);
+    box-shadow: 0 0 15px rgba(0, 217, 255, 0.5);
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+}
+
+.btn-submit:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);
+}
+
+.agent-info {
+    text-align: center;
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(0, 217, 255, 0.1);
+    border: 2px solid #00d9ff;
+    border-radius: 8px;
+}
+
+.agent-number {
+    font-size: 48px;
+    color: #00ff88;
+    text-shadow: 0 0 15px #00ff88;
+    margin: 10px 0;
+}
+
+.loading {
+    text-align: center;
+    color: #66e0ff;
+    font-size: 18px;
+}
+
+.error-message {
+    color: #ff3366;
+    background: rgba(255, 51, 102, 0.1);
+    padding: 15px;
+    border: 2px solid #ff3366;
+    border-radius: 5px;
+    margin-top: 15px;
+    text-align: center;
+}
