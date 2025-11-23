@@ -1,221 +1,282 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8">
-<title>Simulátor kostelní komunity</title>
-<style>
-body { font-family: Arial, sans-serif; background: #f0f4f8; margin: 0; padding: 20px; }
-h1 { text-align: center; color: #4b0082; }
-.container { max-width: 1000px; margin: 0 auto; }
-.card-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-.person-card { width: 100px; text-align: center; border: 2px solid #ccc; border-radius: 8px; padding: 5px; background: #fff; cursor: pointer; }
-.person-card.selected { border-color: #800080; background: #e0c8ff; }
-.person-card img { width: 80px; height: 80px; border-radius: 50%; }
-.message { background: #d0e8ff; padding: 8px; margin: 10px 0; border-radius: 5px; }
-.input-group { margin: 10px 0; }
-input[type=text] { padding: 5px; font-size: 16px; width: 150px; text-transform: uppercase; }
-button { padding: 6px 10px; margin-left: 5px; }
-.details { background: #fff0ff; padding: 10px; margin-top: 10px; border-radius: 8px; }
-.stats { display: flex; justify-content: space-around; margin: 10px 0; padding: 10px; background: #fff; border-radius: 8px; }
-.stats div { text-align: center; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tajná mise - Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #00d9ff;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 217, 255, 0.03) 2px, rgba(0, 217, 255, 0.03) 4px);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 10, 30, 0.9);
+            border: 3px solid #00d9ff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.5), inset 0 0 50px rgba(0, 217, 255, 0.1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .top-secret {
+            text-align: center;
+            color: #ff3366;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 5px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #ff3366;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00d9ff;
+            color: #00d9ff;
+        }
+
+        .agent-name {
+            text-align: center;
+            font-size: 32px;
+            color: #00d9ff;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 217, 255, 0.15);
+            border: 2px solid #00d9ff;
+            border-radius: 5px;
+            text-shadow: 0 0 10px #00d9ff;
+        }
+
+        .mission-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        .mission-table th {
+            background: rgba(0, 217, 255, 0.2);
+            padding: 15px;
+            text-align: left;
+            border: 2px solid #00d9ff;
+            font-size: 18px;
+            color: #00d9ff;
+        }
+
+        .mission-table td {
+            padding: 15px;
+            border: 2px solid #00d9ff;
+            font-size: 16px;
+        }
+
+        .mission-name {
+            color: #66e0ff;
+        }
+
+        .stamp-cell {
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(0, 100, 150, 0.1);
+            position: relative;
+        }
+
+        .stamp-cell:hover {
+            background: rgba(0, 150, 200, 0.25);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+        }
+
+        .stamp {
+            width: 80px;
+            height: 80px;
+            display: inline-block;
+            animation: stampAppear 0.5s ease-out;
+            transform: rotate(-15deg);
+        }
+        
+        .stamp svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 8px #00ff88);
+        }
+
+        @keyframes stampAppear {
+            0% {
+                transform: scale(0) rotate(-15deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2) rotate(-15deg);
+            }
+            100% {
+                transform: scale(1) rotate(-15deg);
+                opacity: 1;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .click-hint {
+            color: #999;
+            font-size: 12px;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-  <h1>⛪ Simulátor kostelní komunity</h1>
+    <div class="container">
+        <div class="top-secret">⚠ PŘÍSNĚ TAJNÉ ⚠</div>
+        <h1>🕵️ MISE: DEN OTEVŘENÝCH DVEŘÍ 🕵️</h1>
+        
+        <div class="agent-name" contenteditable="true" id="agentName">
+            AGENT 007
+        </div>
 
-  <div class="stats" id="communityStats"></div>
+        <table class="mission-table">
+            <thead>
+                <tr>
+                    <th style="width: 60%;">NÁZEV ATRAKCE</th>
+                    <th style="width: 40%;">SPLNĚNO <span class="click-hint">(klikni)</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mission-name">Šifrovací laboratoř</td>
+                    <td class="stamp-cell" onclick="toggleStamp(this)"></td>
+                </tr>
+                <tr>
+                    <td class="mission-name">Laserový tunel</td>
+                    <td class="stamp-cell" onclick="toggleStamp(this)"></td>
+                </tr>
+                <tr>
+                    <td class="mission-name">Tajná chemická laboratoř</td>
+                    <td class="stamp-cell" onclick="toggleStamp(this)"></td>
+                </tr>
+                <tr>
+                    <td class="mission-name">Výcvik špionů</td>
+                    <td class="stamp-cell" onclick="toggleStamp(this)"></td>
+                </tr>
+                <tr>
+                    <td class="mission-name">Gadget showroom</td>
+                    <td class="stamp-cell" onclick="toggleStamp(this)"></td>
+                </tr>
+                <tr>
+                    <td class="mission-name">Tajná mise Q</td>
+                    <td class="stamp-cell" onclick="toggleStamp(this)"></td>
+                </tr>
+                <tr>
+                    <td class="mission-name">Parkour dráha</td>
+                    <td class="stamp-cell" onclick="toggleStamp(this)"></td>
+                </tr>
+                <tr>
+                    <td class="mission-name">Střelnice</td>
+                    <td class="stamp-cell" onclick="toggleStamp(this)"></td>
+                </tr>
+                <tr>
+                    <td class="mission-name">Hackování systému</td>
+                    <td class="stamp-cell" onclick="toggleStamp(this)"></td>
+                </tr>
+                <tr>
+                    <td class="mission-name">Únikový pokoj</td>
+                    <td class="stamp-cell" onclick="toggleStamp(this)"></td>
+                </tr>
+                <tr>
+                    <td class="mission-name">Výbušninový workshop</td>
+                    <td class="stamp-cell" onclick="toggleStamp(this)"></td>
+                </tr>
+                <tr>
+                    <td class="mission-name">Finální zkouška agenta</td>
+                    <td class="stamp-cell" onclick="toggleStamp(this)"></td>
+                </tr>
+            </tbody>
+        </table>
 
-  <div class="input-group">
-    <label>Zadejte kód kartičky: </label>
-    <input type="text" id="codeInput" maxlength="6" placeholder="###XXX">
-    <button id="kontrola" onclick="checkCode()">Zkontrolovat</button>
-    <button onclick="useCode()">Použít kód</button>
-  </div>
+        <div class="footer">
+            📋 KLASIFIKACE: TAJNÉ | AGENTURA: MI6 | DATUM: 2025
+        </div>
+    </div>
 
-  <div id="message" class="message"></div>
+    <script>
+        function toggleStamp(cell) {
+            if (cell.innerHTML === '') {
+                cell.innerHTML = `<div class="stamp">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Vnější kruh -->
+                        <circle cx="100" cy="100" r="95" fill="none" stroke="#00ff88" stroke-width="3"/>
+                        
+                        <!-- Klobouk -->
+                        <ellipse cx="100" cy="75" rx="35" ry="8" fill="none" stroke="#00ff88" stroke-width="3"/>
+                        <path d="M 70 75 Q 70 65 75 60 L 125 60 Q 130 65 130 75" fill="none" stroke="#00ff88" stroke-width="3"/>
+                        <line x1="75" y1="75" x2="75" y2="82" stroke="#00ff88" stroke-width="3"/>
+                        <line x1="125" y1="75" x2="125" y2="82" stroke="#00ff88" stroke-width="3"/>
+                        <path d="M 65 82 L 135 82 Q 137 82 137 85 L 137 88 Q 137 90 135 90 L 65 90 Q 63 90 63 88 L 63 85 Q 63 82 65 82" fill="none" stroke="#00ff88" stroke-width="3"/>
+                        
+                        <!-- Brýle -->
+                        <circle cx="80" cy="110" r="15" fill="none" stroke="#00ff88" stroke-width="3"/>
+                        <circle cx="120" cy="110" r="15" fill="none" stroke="#00ff88" stroke-width="3"/>
+                        <line x1="95" y1="110" x2="105" y2="110" stroke="#00ff88" stroke-width="3"/>
+                        
+                        <!-- Text SPLNĚNO -->
+                        <path id="circlePath" d="M 100,100 m -75,0 a 75,75 0 1,1 150,0 a 75,75 0 1,1 -150,0" fill="none"/>
+                        <text font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#00ff88">
+                            <textPath href="#circlePath" startOffset="25%">
+                                SPLNĚNO
+                            </textPath>
+                        </text>
+                    </svg>
+                </div>`;
+            } else {
+                cell.innerHTML = '';
+            }
+        }
 
-  <div class="card-grid" id="communityGrid"></div>
-
-  <div id="personDetails" class="details"></div>
-</div>
-
-<script>
-// Startovní zdroje
-let resources = { víra: 20, radost: 20, peníze: 10, vztah: 5, znalost: 5 };
-let turn = 1;
-let timeLeft = 60;
-let vyuzito=[];
-let cardsData = [];
-let runtime=60;
-let interval=1000;
-let Cturn=0
-fetch('cards/data.json')
-  .then(resp => resp.json())
-  .then(data => {
-    cardsData = data;
-    initCommunity();
-    updateStats();
-  })
-  .catch(err => alert("Nepodařilo se načíst data.json"));
-
-const peopleCount = 16;
-let community = [];
-let selectedPerson = null;
-let decodedCard = null;
-
-function initCommunity() {
-  community = [];
-  for(let i=0;i<peopleCount;i++){
-    community.push({
-      id: i,
-      card: { 
-        name: "Student", 
-        image: "student.png", 
-        produces: { víra: 1, radost: 1, znalost: 1 }, 
-        costs: {}, 
-        traits: {}, 
-        description: "Všichni jsou někdy studenti." 
-      }
-    });
-  }
-  renderCommunity();
-}
-
-let gameInterval = setInterval(() => {
-  timeLeft--;
-  if (timeLeft <= 0) {
-    runTurn();
-    timeLeft = runtime;
-    turn++;
-  }
-  updateStats();
-}, interval);
-
-
-function runTurn(){
-  community.forEach(p=>{
-    let canWork = true;
-    if(p.card.costs){
-      for(let k in p.card.costs){
-        if(resources[k] < p.card.costs[k]) canWork = false;
-      }
-    }
-    if(canWork){
-      for(let k in p.card.costs) resources[k] -= p.card.costs[k];
-      for(let k in p.card.produces){
-        resources[k] = (resources[k] || 0) + p.card.produces[k];
-      }
-    }
-  });
-}
-
-function updateStats(){
-  const statsDiv = document.getElementById("communityStats");
-  statsDiv.innerHTML = `
-    <div>Víra: ${Math.floor(resources.víra)}</div>
-    <div>Radost: ${Math.floor(resources.radost)}</div>
-    <div>Peníze: ${Math.floor(resources.peníze)}</div>
-    <div>PR: ${Math.floor(resources.vztah)}</div>
-    <div>Znalost: ${Math.floor(resources.znalost)}</div>
-    <div>Kolo: ${turn}</div>
-    <div>Čas: ${timeLeft}</div>
-  `;
-}
-
-function renderCommunity(){
-  const grid = document.getElementById("communityGrid");
-  grid.innerHTML = "";
-  community.forEach(p=>{
-    const div = document.createElement("div");
-    div.className = "person-card" + (selectedPerson === p.id ? " selected" : "");
-    div.onclick = ()=>{ selectedPerson = p.id; renderCommunity(); showDetails(p.id); }
-    div.innerHTML = `
-      <img src="cards/${p.card.image}" alt="${p.card.name}">
-      <div>${p.card.name}</div>
-    `;
-    grid.appendChild(div);
-  });
-}
-
-function checkCode(){
-  const code = document.getElementById("codeInput").value.trim().toUpperCase();
-  decodedCard = cardsData.find(c=>c.code === code);
-  const msg = document.getElementById("message");
-  
-if (Cturn>0 && turn-Cturn>=100 ){
-    interval=99999999999999
-timeLeft=999999999;
-}
-
-if (code === "WW$WW") {
-  clearInterval(gameInterval);
-  Cturn = turn;
-  msg.innerText = "⚡ Režim rychlého běhu aktivován!";
-
-  gameInterval = setInterval(() => {
-    runTurn();
-    updateStats();
-    turn++;
-
-    // kontrola konce po 100 kolech
-    if (Cturn > 0 && turn - Cturn >= 100) {
-      clearInterval(gameInterval);
-      msg.innerText = "✅ Konec hry!";
-        document.getElementById("kontrola").style.display = "none";
-
-    }
-
-  }, 100); // každých 0.1 sekundy = rychlý běh
-
-  return;
-}
-  
-  if(!code || code.length !== 6){
-    decodedCard = null;
-    msg.innerText = "❌ Kód musí mít přesně 6 znaků!";
-  } else if(!decodedCard){
-    msg.innerText = "❌ Neplatný kód!";
-  } else {
-    msg.innerText = `✅ Kód platný! Kartička: ${decodedCard.name}`;
-  }
-}
-
-function useCode(){
-  const msg = document.getElementById("message");
-  if(decodedCard===null){
-    msg.innerText = "❌ Nejprve zkontrolujte kód!";
-    return;
-  }
-  if(selectedPerson===null){
-    msg.innerText = "❌ Vyberte osobu!";
-    return;
-  }
-    if(vyuzito.includes(decodedCard)){
-    msg.innerText = "❌ Každá karta může být využita maximálně jednou!";
-    return;
-  }
-  community[selectedPerson].card = decodedCard;
-  msg.innerText = `✅ Osoba ${selectedPerson+1} se změnila na ${decodedCard.name}`;
-  vyuzito.push(decodedCard)
-  renderCommunity();
-  showDetails(selectedPerson);
-  decodedCard = null;
-  document.getElementById("codeInput").value = "";
-}
-
-function showDetails(personId){
-  const details = document.getElementById("personDetails");
-  const card = community[personId].card;
-  details.innerHTML = `
-    <h3>Osoba ${personId+1} - ${card.name}</h3>
-    <p>${card.description}</p>
-    <p><strong>Produkuje:</strong> ${Object.entries(card.produces).map(([k,v])=>`${k === 'vztah' ? 'PR' : k}: +${v}`).join(', ') || '-'}</p>
-    <p><strong>Stojí:</strong> ${Object.entries(card.costs).map(([k,v])=>`${k === 'vztah' ? 'PR' : k}: ${v}`).join(', ') || '-'}</p>
-    <p><strong>Vlastnosti:</strong> ${Object.entries(card.traits).map(([k,v])=>`${k}: ${v}`).join(', ') || '-'}</p>
-  `;
-}
-</script>
-
+        // Upravit jméno agenta
+        const agentNameElement = document.getElementById('agentName');
+        agentNameElement.addEventListener('click', function() {
+            if (this.textContent === 'AGENT 007') {
+                this.textContent = '';
+            }
+        });
+    </script>
 </body>
 </html>
