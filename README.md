@@ -1,2 +1,2 @@
 # Kloboukov.github.io
-This is repository for school project Freedom
+This is repository for school project.
