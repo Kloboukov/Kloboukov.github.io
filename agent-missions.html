@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tajná mise - Agent</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+<body>
+<div class="container" id="mainContainer">
+    <div class="loading" id="loadingDiv">⏳ Načítám agenta...</div>
+</div>
+
+<script>
+const API_URL = 'https://lukas.regularspace.com/agenti/ab_Agent.php';
+let currentAgent = null;
+
+// Seznam misí
+const missions = [
+    'Nasazení robotů v praxi',
+    'Otevírání trezoru',
+    'Náborový plakátek'
+];
+
+// Načíst agenta při načtení stránky
+window.addEventListener('DOMContentLoaded', () => {
+    loadCurrentAgent();
+});
+
+async function loadCurrentAgent() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const agentId = urlParams.get("id");
+
+    if (!agentId) {
+        showError("Agent nenalezen! Přesměrování na registraci...");
+        setTimeout(() => window.location.href = 'index.html', 2000);
+        return;
+    }
+
+    try {
+        // POST data přes FormData
+        const formData = new FormData();
+        formData.append("Ag_ID", agentId);
+
+        const response = await fetch(API_URL, {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) throw new Error("Chyba při načítání agenta");
+
+        const data = await response.json();
+
+        if (data.error) throw new Error(data.error);
+
+        currentAgent = data;
+        renderPage();
+    } catch (e) {
+        console.error(e);
+        showError("❌ Nepodařilo se načíst agenta. Zkontroluj připojení k serveru.");
+    }
+}
+
+function renderPage() {
+    const container = document.getElementById('mainContainer');
+
+    container.innerHTML = `
+        <div class="top-secret">⚠ PŘÍSNĚ TAJNÉ ⚠</div>
+        <h1>🕵️ MISE: DEN OTEVŘENÝCH DVEŘÍ 🕵️</h1>
+
+        <div class="agent-name" id="agentDisplay">
+            AGENT ${String(currentAgent.id).padStart(3,'0')}
+        </div>
+
+        <table class="mission-table">
+            <thead>
+                <tr>
+                    <th style="width: 60%;">NÁZEV ATRAKCE</th>
+                    <th style="width: 40%;">SPLNĚNO</th>
+                </tr>
+            </thead>
+            <tbody id="missionsTable">
+                ${missions.map((mission,index) => {
+                    if(currentAgent.completed[index] === 1){
+                        return `
+                            <tr>
+                                <td class="mission-name">${mission}</td>
+                                <td class="stamp-cell">${getStampSVG()}</td>
+                            </tr>
+                        `;
+                    } else {
+                        return `
+                            <tr>
+                                <td class="mission-name">${mission}</td>
+                                <td class="stamp-cell"></td>
+                            </tr>
+                        `;
+                    }
+                }).join('')}
+            </tbody>
+        </table>
+
+        <div class="footer">
+            📋 KLASIFIKACE: TAJNÉ | AGENTURA: MI6 | DATUM: 2025
+        </div>
+    `;
+}
+
+// funkce vrátí SVG razítka
+function getStampSVG() {
+    return `<div class="stamp">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="95" fill="none" stroke="#00ff88" stroke-width="3"/>
+            <ellipse cx="100" cy="75" rx="35" ry="8" fill="none" stroke="#00ff88" stroke-width="3"/>
+            <path d="M 70 75 Q 70 65 75 60 L 125 60 Q 130 65 130 75" fill="none" stroke="#00ff88" stroke-width="3"/>
+            <line x1="75" y1="75" x2="75" y2="82" stroke="#00ff88" stroke-width="3"/>
+            <line x1="125" y1="75" x2="125" y2="82" stroke="#00ff88" stroke-width="3"/>
+            <path d="M 65 82 L 135 82 Q 137 82 137 85 L 137 88 Q 137 90 135 90 L 65 90 Q 63 90 63 88 L 63 85 Q 63 82 65 82" fill="none" stroke="#00ff88" stroke-width="3"/>
+            <circle cx="80" cy="110" r="15" fill="none" stroke="#00ff88" stroke-width="3"/>
+            <circle cx="120" cy="110" r="15" fill="none" stroke="#00ff88" stroke-width="3"/>
+            <line x1="95" y1="110" x2="105" y2="110" stroke="#00ff88" stroke-width="3"/>
+            <path id="circlePath" d="M 100,100 m -75,0 a 75,75 0 1,1 150,0 a 75,75 0 1,1 -150,0" fill="none"/>
+            <text font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#00ff88">
+                <textPath href="#circlePath" startOffset="25%">SPLNĚNO</textPath>
+            </text>
+        </svg>
+    </div>`;
+}
+
+// Zobrazí chybu
+function showError(message) {
+    const container = document.getElementById('mainContainer');
+    container.innerHTML = `<div class="error">${message}</div>`;
+}
+</script>
+
+</body>
+</html>

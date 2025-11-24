@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8" />
+    <title>Úprava agenta</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <div class="container">
+        <h1>Upravit agenta</h1>
+
+        <div id="agentInfo">Načítám...</div>
+
+        <script>
+            const params = new URLSearchParams(window.location.search);
+            const agentId = params.get("id");
+
+            async function loadAgent() {
+                const form = new FormData();
+                form.append("Ag_ID", agentId);
+
+                const response = await fetch("https://lukas.regularspace.com/agenti/admin_get_agent.php", {
+                    method: "POST",
+                    body: form
+                });
+
+                const data = await response.json();
+
+                const div = document.getElementById("agentInfo");
+                div.innerHTML = `
+                    <p><b>ID:</b> ${data.id}</p>
+                    <p><b>Jméno:</b> ${data.name}</p>
+
+                    <h3>Mise</h3>
+                    <label>
+                        <input type="checkbox" id="m0" ${data.completed[0] ? "checked" : ""}> Mise 1
+                    </label><br>
+                    <label>
+                        <input type="checkbox" id="m1" ${data.completed[1] ? "checked" : ""}> Mise 2
+                    </label><br>
+                    <label>
+                        <input type="checkbox" id="m2" ${data.completed[2] ? "checked" : ""}> Mise 3
+                    </label><br><br>
+
+                    <button onclick="save()">Uložit změny</button>
+                `;
+            }
+
+            async function save() {
+                const form = new FormData();
+                form.append("Ag_ID", agentId);
+                form.append("m0", document.getElementById("m0").checked ? 1 : 0);
+                form.append("m1", document.getElementById("m1").checked ? 1 : 0);
+                form.append("m2", document.getElementById("m2").checked ? 1 : 0);
+
+                const response = await fetch("https://lukas.regularspace.com/agenti/admin_update_agent.php", {
+                    method: "POST",
+                    body: form
+                });
+
+                const txt = await response.text();
+                alert(txt);
+            }
+
+            loadAgent();
+        </script>
+        <br>
+        <button onclick="document.location='admin-list.html'">Zpátky</button>
+    </div>
+    
+</body>
+</html>

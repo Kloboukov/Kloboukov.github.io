@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Administrace agentů</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+
+        <h1>Administrace agentů</h1>
+
+        <!-- Vyhledávací pole -->
+        <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Hledat agenta..." 
+            style="width:100%; padding:10px; margin-bottom:15px; font-size:16px;"
+        />
+
+        <div id="agentList">Načítám agenty...</div>
+
+        <script>
+            let agents = []; // sem se uloží všichni agenti
+
+            async function loadAgents() {
+                const response = await fetch("https://lukas.regularspace.com/agenti/admin_get_agents.php");
+                agents = await response.json();
+                renderAgents(agents);
+            }
+
+            // vykreslení seznamu
+            function renderAgents(list) {
+                const container = document.getElementById("agentList");
+                container.innerHTML = "";
+
+                if (list.length === 0) {
+                    container.innerHTML = "<div>Žádný agent nenalezen.</div>";
+                    return;
+                }
+
+                list.forEach(agent => {
+                    const item = document.createElement("div");
+                    item.className = "agent-item";
+                    item.style.cursor = "pointer";
+                    item.style.padding = "8px";
+                    item.style.borderBottom = "1px solid #444";
+                    item.textContent = `AGENT ${String(agent.Agent_ID).padStart(3,"0")} – ${agent.Agent_name}`;
+
+                    item.onclick = () => {
+                        window.location.href = `admin-agent.html?id=${agent.Agent_ID}`;
+                    };
+
+                    container.appendChild(item);
+                });
+            }
+
+            // filtrovaní vyhledáváním
+            document.addEventListener("DOMContentLoaded", () => {
+                const searchInput = document.getElementById("searchInput");
+
+                searchInput.addEventListener("input", () => {
+                    const term = searchInput.value.toLowerCase().trim();
+
+                    const filtered = agents.filter(a =>
+                        a.Agent_name.toLowerCase().includes(term) ||
+                        String(a.Agent_ID).padStart(3,"0").includes(term)
+                    );
+
+                    renderAgents(filtered);
+                });
+
+                loadAgents();
+            });
+        </script>
+
+    </div>
+</body>
+</html>
