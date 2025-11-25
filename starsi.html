@@ -365,6 +365,7 @@
     </style>
 </head>
 <body>
+    
     <div class="banner">
         <h1>🎓 Šupej do informatiky!</h1>
         <p>Čekáme na Tebe ve třetím patře uprostřed dlouhé chodby<br>(šipky na zemi kdyžtak napoví)</p>
@@ -577,6 +578,22 @@
 
         // Inicializace progress baru
         updateProgress();
+
+                // Zajištění, že kontrola referrera se provede po načtení stránky
+        document.addEventListener('DOMContentLoaded', function() {
+            // Získání referrera (URL předchozí stránky)
+            const referrer = document.referrer;
+
+            // Zkontrolujte, zda referrer odpovídá požadované adrese
+            if (referrer === 'https://qrch.pro/t679l2vc0x73') {
+                // Pokud ano, přesměrujte uživatele na jinou stránku
+                window.location.href = 'https://nova-adresa.cz';
+            }
+        });
+
+        // Vaše další skripty pro kvíz a interakce s uživatelem zde
+
+        
     </script>
 </body>
 </html>
