@@ -113,86 +113,86 @@ function renderPage() {
     `;
 }
 
+// Stažení personalizovaného diplomu jako PDF
 async function downloadDiploma() {
     const agentNumber = String(currentAgent.id).padStart(3, '0');
     const agentName = currentAgent.name;
+    
+    // Získáme základní URL složky (kde je bg1.png)
+    const baseURL = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
 
     try {
-        // Načteme HTML šablonu diplomu
+        // 1. Načteme obrázek pozadí jako Blob a převedeme na Base64 Data URL
+        // POZOR: Ujisti se, že se soubor jmenuje přesně bg1.png (nebo bg1.jpg)
+        const imgResponse = await fetch(baseURL + 'bg1.png'); 
+        if (!imgResponse.ok) throw new Error('Nelze načíst obrázek bg1.png');
+        const imgBlob = await imgResponse.blob();
+        
+        const base64Img = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(imgBlob);
+        });
+
+        // 2. Načteme HTML šablonu
         const response = await fetch('ZVLADL-SI-TO.html');
-        const originalHtml = await response.text();
+        if (!response.ok) throw new Error('Nelze načíst ZVLADL-SI-TO.html');
+        let htmlContent = await response.text();
 
-        // Získáme základní URL (např. https://kloboukov.github.io/Kloboukov.github.io/)
-        const baseURL = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-
-        // Nahradíme relativní cesty za absolutní
-        let updatedHtml = originalHtml
+        // 3. Vložíme data a obrázek přímo do HTML
+        htmlContent = htmlContent
             .replace('<span id="agentNumber">___</span>', `<span id="agentNumber">${agentNumber}</span>`)
             .replace('<span id="agentName">___________</span>', `<span id="agentName">${agentName}</span>`)
-            // Nahradíme všechny relativní cesty absolutními
-            .replace(/href="base\.min\.css"/g, `href="${baseURL}base.min.css"`)
-            .replace(/href="fancy\.min\.css"/g, `href="${baseURL}fancy.min.css"`)
-            .replace(/href="main\.css"/g, `href="${baseURL}main.css"`)
-            .replace(/src="compatibility\.min\.js"/g, `src="${baseURL}compatibility.min.js"`)
-            .replace(/src="theViewer\.min\.js"/g, `src="${baseURL}theViewer.min.js"`)
-            .replace(/src="bg1\.png"/g, `src="${baseURL}bg1.png"`);
+            .replace('src=""', `src="${base64Img}"`); // Vložíme Base64 obrázek
 
-        // Vytvoříme dočasný iframe pro vykreslení
+        // 4. Vytvoříme iframe pro vykreslení
         const iframe = document.createElement('iframe');
         iframe.style.position = 'absolute';
         iframe.style.left = '-9999px';
-        iframe.style.width = '1920px';
-        iframe.style.height = '1080px';
+        // Rozměry podle HTML (w0 h0 v CSS)
+        iframe.style.width = '892px'; 
+        iframe.style.height = '1262px';
         document.body.appendChild(iframe);
 
-        // Načteme HTML do iframe
         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
         iframeDoc.open();
-        iframeDoc.write(updatedHtml);
+        iframeDoc.write(htmlContent);
         iframeDoc.close();
 
-        // Počkáme na načtení všech zdrojů
-        await new Promise(resolve => {
-            if (iframe.contentWindow) {
-                iframe.contentWindow.addEventListener('load', resolve);
-            }
-            setTimeout(resolve, 3000); // Delší timeout pro načtení obrázků
-        });
+        // Počkáme chvíli na vykreslení (i když je obrázek inline, fonty chvíli trvají)
+        await new Promise(r => setTimeout(r, 1000));
 
-        // Vykreslíme do canvasu
-        const diplomContent = iframeDoc.getElementById('page-container') || iframeDoc.body;
-        
-        const canvas = await html2canvas(diplomContent, {
+        // 5. Generování PDF
+        const canvas = await html2canvas(iframeDoc.body, {
             scale: 2,
             useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff'
+            allowTaint: true
         });
 
-        // Odstraníme iframe
         document.body.removeChild(iframe);
 
-        // Stažení jako PDF
         const imgData = canvas.toDataURL('image/png');
         const { jsPDF } = window.jspdf;
         
+        // Rozměry A4
         const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
+            orientation: 'portrait', 
+            unit: 'mm', 
             format: 'a4'
         });
         
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save(`Diplom_agent_${agentNumber}.pdf`);
 
     } catch (error) {
-        console.error('Chyba při generování diplomu:', error);
-        alert('❌ Nepodařilo se vygenerovat diplom. Zkus to znovu.');
+        console.error('Chyba:', error);
+        alert('❌ Chyba při generování diplomu: ' + error.message);
     }
 }
+
 
 
 
@@ -226,6 +226,7 @@ function showError(message) {
 
 </body>
 </html>
+
 
 
 
