@@ -17,10 +17,11 @@ let currentAgent = null;
 
 // Seznam misí
 const missions = [
-    'Nasazení robotů v praxi',
-    'Otevírání trezoru',
-    'Náborový plakátek'
+    'Nasazení robotů v praxi <h6>Druhé patro</h6>',
+    'Otevírání trezoru <h6>Informatika</h6>',
+    'Náborový plakátek<h6>Informatika</h6>'
 ];
+
 
 // Načíst agenta při načtení stránky
 window.addEventListener('DOMContentLoaded', () => {
@@ -75,27 +76,19 @@ function renderPage() {
         <table class="mission-table">
             <thead>
                 <tr>
-                    <th style="width: 60%;">NÁZEV ATRAKCE</th>
+                    <th style="width: 60%;">NÁZEV ZKOUŠKY</th>
                     <th style="width: 40%;">SPLNĚNO</th>
                 </tr>
             </thead>
             <tbody id="missionsTable">
-                ${missions.map((mission,index) => {
-                    if(currentAgent.completed[index] === 1){
-                        return `
-                            <tr>
-                                <td class="mission-name">${mission}</td>
-                                <td class="stamp-cell">${getStampSVG()}</td>
-                            </tr>
-                        `;
-                    } else {
-                        return `
-                            <tr>
-                                <td class="mission-name">${mission}</td>
-                                <td class="stamp-cell"></td>
-                            </tr>
-                        `;
-                    }
+                ${missions.map((mission, index) => {
+                    const isCompleted = currentAgent.completed[index] === 1;
+                    return `
+                        <tr>
+                            <td class="mission-name">${mission}</td>
+                            <td class="stamp-cell">${isCompleted ? getStampSVG() : ''}</td>
+                        </tr>
+                    `;
                 }).join('')}
             </tbody>
         </table>
@@ -105,6 +98,7 @@ function renderPage() {
         </div>
     `;
 }
+
 
 // funkce vrátí SVG razítka
 function getStampSVG() {
@@ -136,3 +130,4 @@ function showError(message) {
 
 </body>
 </html>
+
