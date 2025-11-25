@@ -114,30 +114,92 @@ function renderPage() {
 }
 
 // Stažení personalizovaného diplomu
+// Stažení personalizovaného diplomu jako PDF
 async function downloadDiploma() {
     const agentNumber = String(currentAgent.id).padStart(3, '0');
     const agentName = currentAgent.name;
 
-    const response = await fetch('ZVLADL-SI-TO.html');
-    const originalHtml = await response.text();
+    try {
+        // Načteme HTML šablonu diplomu
+        const response = await fetch('ZVLADL-SI-TO.html');
+        const originalHtml = await response.text();
 
-    // Nahradíme placeholdery za skutečná data
-    let updatedHtml = originalHtml
-        .replace('<span id="agentNumber">___</span>', `<span id="agentNumber">${agentNumber}</span>`)
-        .replace('<span id="agentName">___________</span>', `<span id="agentName">${agentName}</span>`);
+        // Nahradíme placeholdery
+        let updatedHtml = originalHtml
+            .replace('<span id="agentNumber">___</span>', `<span id="agentNumber">${agentNumber}</span>`)
+            .replace('<span id="agentName">___________</span>', `<span id="agentName">${agentName}</span>`);
 
-    const blob = new Blob([updatedHtml], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
+        // Vytvoříme dočasný iframe pro vykreslení
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'absolute';
+        iframe.style.left = '-9999px';
+        iframe.style.width = '1920px';  // Šířka diplomu
+        iframe.style.height = '1080px'; // Výška diplomu
+        document.body.appendChild(iframe);
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Diplom_agent_${agentNumber}.html`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+        // Načteme HTML do iframe
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(updatedHtml);
+        iframeDoc.close();
 
-    URL.revokeObjectURL(url);
+        // Počkáme na načtení všech zdrojů (obrázky, fonty)
+        await new Promise(resolve => {
+            if (iframe.contentWindow) {
+                iframe.contentWindow.addEventListener('load', resolve);
+            }
+            setTimeout(resolve, 2000); // Fallback timeout
+        });
+
+        // Vykreslíme do canvasu
+        const diplomContent = iframeDoc.getElementById('page-container') || iframeDoc.body;
+        
+        const canvas = await html2canvas(diplomContent, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff'
+        });
+
+        // Odstraníme iframe
+        document.body.removeChild(iframe);
+
+        /* // VARIANTA 1: Stažení jako PNG obrázek (odkomentuj pokud chceš obrázek)
+        canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Diplom_agent_${agentNumber}.png`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        });
+        */
+
+        // VARIANTA 2: Stažení jako PDF
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        
+        // A4 rozměry v mm (landscape pro širší diplom)
+        const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4'
+        });
+        
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`Diplom_agent_${agentNumber}.pdf`);
+
+    } catch (error) {
+        console.error('Chyba při generování diplomu:', error);
+        alert('❌ Nepodařilo se vygenerovat diplom. Zkus to znovu.');
+    }
 }
+
 
 
 // Vrací SVG razítka
@@ -170,5 +232,6 @@ function showError(message) {
 
 </body>
 </html>
+
 
 
