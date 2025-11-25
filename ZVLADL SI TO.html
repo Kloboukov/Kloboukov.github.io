@@ -1,32 +1,57 @@
 <!DOCTYPE html>
-<!-- Created by pdf2htmlEX (https://github.com/coolwanglu/pdf2htmlex) -->
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta charset="utf-8"/>
-
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-<link rel="stylesheet" href="base.min.css"/>
-<link rel="stylesheet" href="fancy.min.css"/>
-<link rel="stylesheet" href="main.css"/>
-<script src="compatibility.min.js"></script>
-<script src="theViewer.min.js"></script>
-<script>
-try{
-theViewer.defaultViewer = new theViewer.Viewer({});
-}catch(e){}
-</script>
-<title>Diplom - Agent</title>
+<title>Diplom</title>
+<style>
+/* VLOŽENÉ STYLY Z base.min.css, fancy.min.css a main.css */
+body{margin:0;padding:0;overflow:hidden;background-color:#fff;}
+#page-container{position:relative;overflow:hidden;width:892px;height:1262px;margin:0 auto;}
+.pf{position:relative;background-color:white;overflow:hidden;margin:0;border:0;width:100%;height:100%;}
+.pc{position:absolute;border:0;padding:0;margin:0;top:0;left:0;width:100%;height:100%;overflow:hidden;display:block;transform-origin:0 0;-ms-transform-origin:0 0;-webkit-transform-origin:0 0;}
+.bi{position:absolute;border:0;margin:0;-ms-user-select:none;-moz-user-select:none;-webkit-user-select:none;user-select:none;}
+.t{position:absolute;white-space:pre;overflow:visible;font-family:sans-serif;}
+
+/* Specifické pozice pro tento dokument (odvozeno z původního HTML) */
+.w0{width:892px;} .h0{height:1262px;}
+.x0{left:0px;} .y0{bottom:0px;} 
+.x1{left:275px;} .h1{height:48px;} .y1{bottom:1053px;}
+.x2{left:123px;} .h2{height:39px;} .y2{bottom:964px;}
+.x3{left:212px;} .h3{height:42px;} .y3{bottom:905px;}
+.x4{left:246px;} .y4{bottom:845px;} /* AGENTA */
+.x5{left:113px;} .h4{height:33px;} .y5{bottom:739px;} /* KRYCÍ JMÉNO */
+.x6{left:229px;} .h5{height:31px;} .y6{bottom:333px;}
+.x7{left:218px;} .y7{bottom:282px;}
+.x8{left:389px;} .y8{bottom:231px;}
+
+/* Fonty a barvy */
+.ff1{font-family:Arial,sans-serif;font-weight:bold;}
+.ff2{font-family:Arial,sans-serif;}
+.ff3{font-family:Arial,sans-serif;font-weight:bold;}
+.fs0{font-size:40px;} .fs1{font-size:36px;} .fs2{font-size:28px;}
+.fc0{color:rgb(0,0,0);} .fc1{color:rgb(23,54,93);}
+.sc0{text-shadow:none;} .sc1{text-shadow:none;}
+.ls0{letter-spacing:0;} .ws0{word-spacing:0;}
+</style>
 </head>
 <body>
-<div id="sidebar">
-<div id="outline">
-</div>
-</div>
 <div id="page-container">
-<div id="pf1" class="pf w0 h0" data-page-no="1"><div class="pc pc1 w0 h0"><img class="bi x0 y0 w0 h0" alt="" src="bg1.png"/><div class="t m0 x1 h1 y1 ff1 fs0 fc0 sc0 ls0 ws0">ZVLÁDL SI TO!</div><div class="t m0 x2 h2 y2 ff2 fs1 fc1 sc1 ls0 ws0">TÍMTO TĚ JMÉNEM GYMNÁZIA </div><div class="t m0 x3 h3 y3 ff3 fs1 fc1 sc1 ls0 ws0">JANA KEPLERA PASUJI NA </div><div class="t m0 x4 h3 y4 ff3 fs1 fc1 sc1 ls0 ws0">AGENTA <span id="agentNumber">___</span>!</div><div class="t m0 x5 h4 y5 ff2 fs2 fc0 sc1 ls0 ws0">KRYCÍ JMÉNO: <span id="agentName">___________</span></div><div class="t m0 x6 h5 y6 ff3 fs2 fc0 sc1 ls0 ws0">SPECIALIZACE: ROBOTIKA, </div><div class="t m0 x7 h4 y7 ff2 fs2 fc0 sc1 ls0 ws0">HACKOVÁNÍ, INFORMATIKA, </div><div class="t m0 x8 h5 y8 ff3 fs2 fc0 sc1 ls0 ws0">GRAFIKA</div></div><div class="pi" data-data='{"ctm":[1.000000,0.000000,0.000000,1.000000,0.000000,0.000000]}'></div></div>
+<div id="pf1" class="pf w0 h0" data-page-no="1">
+    <div class="pc pc1 w0 h0">
+        <!-- Pozadí - src se doplní dynamicky -->
+        <img class="bi x0 y0 w0 h0" alt="" id="bgImage" src=""/>
+        
+        <div class="t m0 x1 h1 y1 ff1 fs0 fc0 sc0 ls0 ws0">ZVLÁDL SI TO!</div>
+        <div class="t m0 x2 h2 y2 ff2 fs1 fc1 sc1 ls0 ws0">TÍMTO TĚ JMÉNEM GYMNÁZIA</div>
+        <div class="t m0 x3 h3 y3 ff3 fs1 fc1 sc1 ls0 ws0">JANA KEPLERA PASUJI NA</div>
+        <div class="t m0 x4 h3 y4 ff3 fs1 fc1 sc1 ls0 ws0">AGENTA <span id="agentNumber">___</span>!</div>
+        <div class="t m0 x5 h4 y5 ff2 fs2 fc0 sc1 ls0 ws0">KRYCÍ JMÉNO: <span id="agentName">___________</span></div>
+        <div class="t m0 x6 h5 y6 ff3 fs2 fc0 sc1 ls0 ws0">SPECIALIZACE: ROBOTIKA,</div>
+        <div class="t m0 x7 h4 y7 ff2 fs2 fc0 sc1 ls0 ws0">HACKOVÁNÍ, INFORMATIKA,</div>
+        <div class="t m0 x8 h5 y8 ff3 fs2 fc0 sc1 ls0 ws0">GRAFIKA</div>
+    </div>
 </div>
-<div class="loading-indicator">
-
 </div>
 </body>
 </html>
