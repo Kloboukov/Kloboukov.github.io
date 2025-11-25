@@ -22,7 +22,6 @@ const missions = [
     'Náborový plakátek<h6>Informatika</h6>'
 ];
 
-
 // Načíst agenta při načtení stránky
 window.addEventListener('DOMContentLoaded', () => {
     loadCurrentAgent();
@@ -39,7 +38,6 @@ async function loadCurrentAgent() {
     }
 
     try {
-        // POST data přes FormData
         const formData = new FormData();
         formData.append("Ag_ID", agentId);
 
@@ -51,15 +49,19 @@ async function loadCurrentAgent() {
         if (!response.ok) throw new Error("Chyba při načítání agenta");
 
         const data = await response.json();
-
         if (data.error) throw new Error(data.error);
 
         currentAgent = data;
         renderPage();
+
     } catch (e) {
         console.error(e);
         showError("❌ Nepodařilo se načíst agenta. Zkontroluj připojení k serveru.");
     }
+}
+
+function allMissionsCompleted() {
+    return currentAgent.completed.every(v => v === 1);
 }
 
 function renderPage() {
@@ -96,11 +98,43 @@ function renderPage() {
         <div class="footer">
             📋 KLASIFIKACE: TAJNÉ | AGENTURA: MI6 | DATUM: 2025
         </div>
+
+        ${allMissionsCompleted() ? `
+            <div style="text-align:center; margin-top:20px;">
+                <button onclick="downloadDiploma()" class="download-button">
+                    📜 Stáhnout diplom
+                </button>
+            </div>
+        ` : ''}
     `;
 }
 
+// Stažení personalizovaného diplomu
+async function downloadDiploma() {
+    const agentNumber = String(currentAgent.id).padStart(3, '0');
 
-// funkce vrátí SVG razítka
+    const response = await fetch('ZVLADL SI TO.html');
+    const originalHtml = await response.text();
+
+    const updatedHtml = originalHtml.replace(
+        'AGENTA       !',
+        `AGENTA ${agentNumber}!`
+    );
+
+    const blob = new Blob([updatedHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Diplom_agent_${agentNumber}.html`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+}
+
+// Vrací SVG razítka
 function getStampSVG() {
     return `<div class="stamp">
         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -121,7 +155,7 @@ function getStampSVG() {
     </div>`;
 }
 
-// Zobrazí chybu
+// Zobrazení chyby
 function showError(message) {
     const container = document.getElementById('mainContainer');
     container.innerHTML = `<div class="error">${message}</div>`;
@@ -130,4 +164,3 @@ function showError(message) {
 
 </body>
 </html>
-
