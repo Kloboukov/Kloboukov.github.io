@@ -112,14 +112,15 @@ function renderPage() {
 // Stažení personalizovaného diplomu
 async function downloadDiploma() {
     const agentNumber = String(currentAgent.id).padStart(3, '0');
+    const agentName = currentAgent.name;
 
-    const response = await fetch('ZVLADL SI TO.html');
+    const response = await fetch('ZVLADL-SI-TO.html');
     const originalHtml = await response.text();
 
-    const updatedHtml = originalHtml.replace(
-        'AGENTA       !',
-        `AGENTA ${agentNumber}!`
-    );
+    // Nahradíme placeholdery za skutečná data
+    let updatedHtml = originalHtml
+        .replace('<span id="agentNumber">___</span>', `<span id="agentNumber">${agentNumber}</span>`)
+        .replace('<span id="agentName">___________</span>', `<span id="agentName">${agentName}</span>`);
 
     const blob = new Blob([updatedHtml], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
@@ -133,6 +134,7 @@ async function downloadDiploma() {
 
     URL.revokeObjectURL(url);
 }
+
 
 // Vrací SVG razítka
 function getStampSVG() {
@@ -164,3 +166,4 @@ function showError(message) {
 
 </body>
 </html>
+
