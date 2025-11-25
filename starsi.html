@@ -1,9 +1,582 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Example</title>
-    </head>
-    <body>
-        <p>This is an example of a simple HTML page with one paragraph.</p>
-    </body>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kvíz – Šupej do informatiky!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 136, 0.03) 2px, rgba(0, 255, 136, 0.03) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 255, 136, 0.03) 2px, rgba(0, 255, 136, 0.03) 4px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .circuit-line {
+            position: fixed;
+            background: rgba(0, 255, 136, 0.2);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .circuit-dot {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            box-shadow: 0 0 10px #00ff88;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        /* Animované binární kódy */
+        .binary {
+            position: fixed;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: rgba(0, 255, 136, 0.4);
+            pointer-events: none;
+            animation: binaryFall 10s linear infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes binaryFall {
+            0% { transform: translateY(-100px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        .banner {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(26, 26, 46, 0.95);
+            border: 2px solid #00ff88;
+            padding: 15px 40px;
+            border-radius: 50px;
+            box-shadow: 0 8px 32px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.1);
+            z-index: 1000;
+            animation: bannerPulse 3s ease-in-out infinite;
+            text-align: center;
+            max-width: 90%;
+        }
+
+        @keyframes bannerPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 8px 32px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.1); }
+            50% { transform: translateX(-50%) scale(1.05); box-shadow: 0 8px 32px rgba(0, 255, 136, 0.5), inset 0 0 20px rgba(0, 255, 136, 0.2); }
+        }
+
+        .banner h1 {
+            font-size: 1.5rem;
+            color: #00ff88;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .banner p {
+            font-size: 0.9rem;
+            color: #a0a0b0;
+        }
+
+        .container {
+            background: rgba(26, 26, 46, 0.95);
+            border: 2px solid #00ff88;
+            border-radius: 30px;
+            padding: 50px;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 255, 136, 0.3), inset 0 0 30px rgba(0, 255, 136, 0.05);
+            margin-top: 150px;
+            animation: slideIn 0.8s ease-out;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question {
+            display: none;
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        .question.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: #00ff88;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .answers {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .answer {
+            background: rgba(50, 50, 70, 0.6);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            color: #e0e0e0;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .answer:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+            border-color: #00ff88;
+            background: rgba(50, 50, 70, 0.8);
+        }
+
+        .answer.selected {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4), inset 0 0 20px rgba(0, 255, 136, 0.1);
+        }
+
+        .answer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .answer:hover::before {
+            left: 100%;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            color: #1a1a2e;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.6);
+        }
+
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: #065f46;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #991b1b;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(0, 0, 0, 0.1);
+            font-size: 0.95rem;
+        }
+
+        .final {
+            display: none;
+            text-align: center;
+            animation: zoomIn 1s ease;
+        }
+
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .final.show {
+            display: block;
+        }
+
+        .final h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #00ff88;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+            animation: rainbow 3s ease infinite;
+        }
+
+        @keyframes rainbow {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(60deg); }
+        }
+
+        .final p {
+            font-size: 1.3rem;
+            color: #e0e0e0;
+            margin: 20px 0;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #f0f;
+            position: absolute;
+            animation: confettiFall 3s linear;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(50, 50, 70, 0.6);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88 0%, #00cc6e 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+            animation: progressPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes progressPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin-top: 140px;
+            }
+            
+            .banner {
+                padding: 12px 25px;
+            }
+            
+            .banner h1 {
+                font-size: 1.2rem;
+            }
+            
+            .banner p {
+                font-size: 0.8rem;
+            }
+            
+            h2 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <h1>🎓 Šupej do informatiky!</h1>
+        <p>Čekáme na Tebe ve třetím patře uprostřed dlouhé chodby<br>(šipky na zemi kdyžtak napoví)</p>
+    </div>
+
+    <div class="container">
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <!-- Otázka 1 -->
+        <div class="question active" id="q1">
+            <h2>Na škole máme dvě 3D tiskárny, které jsou přístupné i studentům k osobnímu použití. Tušíš, z čeho je vyráběn nejčastěji používaný filament – tedy plastová struna, která se v tiskárně taví a z níž se následně tiskne?</h2>
+            <div class="answers">
+                <div class="answer" data-answer="1">1. z recyklovaných PET lahví</div>
+                <div class="answer" data-answer="2">2. z nově vyrobeného plastu, tedy ze zpracované ropy</div>
+                <div class="answer" data-answer="3">3. z nadrcených kostí smíchaných s roztavenými recyklovanými umělými textilními vlákny</div>
+                <div class="answer" data-answer="4">4. z kukuřičného škrobu</div>
+            </div>
+            <button onclick="checkAnswer(1, '4')" disabled>Potvrdit odpověď</button>
+            <div class="feedback" id="feedback1"></div>
+        </div>
+
+        <!-- Otázka 2 -->
+        <div class="question" id="q2">
+            <h2>Linux je operační systém (jako Windows), který se používá zejména na serverech a dalších neosobních počítačích, na škole je mu věnován jeden z mnoha seminářů. Jeho maskot je tučňák jménem Tux – tušíš, proč právě tučňák?</h2>
+            <div class="answers">
+                <div class="answer" data-answer="1">1. Tvůrce Linuxu Linus Torvalds byl pokousán tučňákem v zoo.</div>
+                <div class="answer" data-answer="2">2. Tučňáci žijí na jižním pólu a Linux vznikl na Novém Zélandu.</div>
+                <div class="answer" data-answer="3">3. Je to zkratka The UX (uživatelské rozhraní).</div>
+                <div class="answer" data-answer="4">4. Tvůrce chtěl něco roztomilého a profesionálního zároveň.</div>
+            </div>
+            <button onclick="checkAnswer(2, '1')" disabled>Potvrdit odpověď</button>
+            <div class="feedback" id="feedback2"></div>
+        </div>
+
+        <!-- Otázka 3 -->
+        <div class="question" id="q3">
+            <h2>Procesor je „mozek" počítače, který provádí všechny výpočty. Moderní procesory mají uvnitř miliardy malých spínačů zvaných tranzistory – kolik jich má přibližně dnešní běžný procesor?</h2>
+            <div class="answers">
+                <div class="answer" data-answer="1">1. asi 100 tisíc – to stačí</div>
+                <div class="answer" data-answer="2">2. asi 10 milionů – už je to hodně</div>
+                <div class="answer" data-answer="3">3. asi 10 miliard – to je víc než lidí na Zemi</div>
+                <div class="answer" data-answer="4">4. asi bilion – to je víc než hvězd v galaxii</div>
+            </div>
+            <button onclick="checkAnswer(3, '3')" disabled>Potvrdit odpověď</button>
+            <div class="feedback" id="feedback3"></div>
+        </div>
+
+        <!-- Otázka 4 -->
+        <div class="question" id="q4">
+            <h2>Python je programovací jazyk, který se na škole učí. Je z mnoha existujících programovacích jazyků vůbec nejpoužívanější a snadno se učí. Je pojmenovaný po hadu, protože jeho tvůrce měl doma krajtu?</h2>
+            <div class="answers">
+                <div class="answer" data-answer="1">1. Ano, a dokonce se jmenovala Python.</div>
+                <div class="answer" data-answer="2">2. Ne, je pojmenovaný po britské komediální skupině Monty Python.</div>
+                <div class="answer" data-answer="3">3. Ne, je to počeštěná zkratka Perfectly Yet Tough HONest language.</div>
+                <div class="answer" data-answer="4">4. Ano, ale byla to užovka, ne krajta.</div>
+            </div>
+            <button onclick="checkAnswer(4, '2')" disabled>Potvrdit odpověď</button>
+            <div class="feedback" id="feedback4"></div>
+        </div>
+
+        <!-- Závěrečná obrazovka -->
+        <div class="final" id="final">
+            <h2>🎉 Skvělá práce! 🎉</h2>
+            <p>Dokončil jsi kvíz!</p>
+            <p>Děkujeme za vyplnění a těšíme se na Tebe ve třetím patře uprostřed dlouhé chodby! 🎓</p>
+            <h1 style="font-size: 4rem; margin-top: 30px;">🖥️💻🚀</h1>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = 1;
+        const totalQuestions = 4;
+        let selectedAnswers = {};
+
+        // Vytvoření binárních kódů padajících po obrazovce
+        function createBinaryRain() {
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const binary = document.createElement('div');
+                    binary.className = 'binary';
+                    binary.textContent = Array(20).fill(0).map(() => Math.random() > 0.5 ? '1' : '0').join('');
+                    binary.style.left = Math.random() * 100 + '%';
+                    binary.style.animationDelay = Math.random() * 10 + 's';
+                    binary.style.animationDuration = (Math.random() * 5 + 8) + 's';
+                    document.body.appendChild(binary);
+                    
+                    setTimeout(() => binary.remove(), 15000);
+                }, i * 800);
+            }
+        }
+
+        // Vytvoření obvodových prvků (PCB styl)
+        function createCircuitBoard() {
+            const lines = [
+                {x: 10, y: 20, width: 30, height: 2, horizontal: true},
+                {x: 40, y: 20, width: 2, height: 40, horizontal: false},
+                {x: 60, y: 50, width: 25, height: 2, horizontal: true},
+                {x: 15, y: 70, width: 2, height: 20, horizontal: false},
+                {x: 70, y: 15, width: 2, height: 30, horizontal: false},
+                {x: 85, y: 60, width: 10, height: 2, horizontal: true},
+            ];
+
+            lines.forEach(line => {
+                const el = document.createElement('div');
+                el.className = 'circuit-line';
+                el.style.left = line.x + '%';
+                el.style.top = line.y + '%';
+                el.style.width = line.horizontal ? line.width + '%' : line.height + 'px';
+                el.style.height = line.horizontal ? line.height + 'px' : line.height + '%';
+                document.body.appendChild(el);
+            });
+
+            const dots = [
+                {x: 40, y: 20}, {x: 40, y: 60}, {x: 60, y: 50},
+                {x: 85, y: 60}, {x: 15, y: 90}, {x: 70, y: 45}
+            ];
+
+            dots.forEach(dot => {
+                const el = document.createElement('div');
+                el.className = 'circuit-dot';
+                el.style.left = dot.x + '%';
+                el.style.top = dot.y + '%';
+                document.body.appendChild(el);
+            });
+        }
+
+        createBinaryRain();
+        createCircuitBoard();
+        setInterval(createBinaryRain, 15000);
+
+        // Výběr odpovědi
+        document.querySelectorAll('.answer').forEach(answer => {
+            answer.addEventListener('click', function() {
+                const parent = this.parentElement;
+                parent.querySelectorAll('.answer').forEach(a => a.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                const questionNum = parseInt(this.closest('.question').id.substring(1));
+                selectedAnswers[questionNum] = this.dataset.answer;
+                
+                const button = this.closest('.question').querySelector('button');
+                button.disabled = false;
+            });
+        });
+
+        function checkAnswer(questionNum, correctAnswer) {
+            const selected = selectedAnswers[questionNum];
+            const feedback = document.getElementById('feedback' + questionNum);
+            const button = document.querySelector('#q' + questionNum + ' button');
+            const answers = document.querySelectorAll('#q' + questionNum + ' .answer');
+            
+            // Zablokovat odpovědi
+            answers.forEach(a => a.style.pointerEvents = 'none');
+            
+            if (selected === correctAnswer) {
+                feedback.className = 'feedback correct show';
+                feedback.innerHTML = '<strong>✓ Správně!</strong>';
+            } else {
+                feedback.className = 'feedback incorrect show';
+                feedback.innerHTML = '<strong>✗ Bohužel ne.</strong> Správná odpověď je ' + correctAnswer + '.';
+            }
+
+            // Přidání vysvětlení k třetí otázce
+            if (questionNum === 3) {
+                feedback.innerHTML += '<div class="explanation">Dnešní nejmodernější procesory jsou vyrobeny 3nm technologií – to znamená, že jednotlivé součástky v nich jsou velké jen 3 nanometry, neboli jednu miliardtinu metru. Lidský vlas má asi 80 000 nm, lidská buňka 10 000 nm, šroubovice DNA, v níž je uložena tvá genetická informace, asi 2 nm a atom křemíku (z nějž se procesory vyrábí) má asi 0,2 nm.</div>';
+            }
+
+            // Změnit tlačítko na přepnutí
+            button.textContent = questionNum === totalQuestions ? 'Dokončit' : 'Další otázka';
+            button.onclick = () => nextQuestion(questionNum);
+        }
+
+        function nextQuestion(questionNum) {
+            if (questionNum < totalQuestions) {
+                document.getElementById('q' + questionNum).classList.remove('active');
+                document.getElementById('q' + (questionNum + 1)).classList.add('active');
+                currentQuestion++;
+            } else {
+                // Konec kvízu
+                document.getElementById('q' + questionNum).classList.remove('active');
+                document.getElementById('final').classList.add('show');
+                createConfetti();
+                currentQuestion = totalQuestions + 1;
+            }
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion - 1) / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = '-10px';
+                    confetti.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+        }
+
+        // Inicializace progress baru
+        updateProgress();
+    </script>
+</body>
 </html>
