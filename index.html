@@ -31,7 +31,7 @@
       </div>
 
       <div class="footer">
-        📋 KLASIFIKACE: TAJNÉ | AGENTURA: MI6 | DATUM: 2025
+        📋 KLASIFIKACE: TAJNÉ | AGENTURA: 6JK | DATUM: 2025
       </div>
       <br>
       <h6>Web slouží k herním účelům, nezadávejte žádné osobní informace</h6> 
@@ -50,8 +50,8 @@
         formData.append("jmeno", name);
 
         try {
-       /*   const response = await fetch(
-            "https://lukas.regularspace.com/agenti/getUser.php",*/
+          const response = await fetch(
+            "https://lukas.regularspace.com/agenti/getUser.php",
             {
               method: "POST",
               body: formData,
@@ -123,4 +123,5 @@
     </script>
   </body>
 </html>
+
 
