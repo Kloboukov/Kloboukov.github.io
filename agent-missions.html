@@ -15,7 +15,63 @@
     <div class="loading" id="loadingDiv">⏳ Načítám agenta...</div>
 </div>
 
+    <div id="diplomaModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Získat diplom</h2>
+        <p>Zadej e-mail, na který ti diplom pošleme.</p>
+
+        <input type="email" id="emailInput" placeholder="tvuj@email.cz" required>
+
+        <div class="modal-buttons">
+            <button onclick="submitDiploma()" class="confirm-button">Odeslat</button>
+            <button onclick="closeDiplomaForm()" class="cancel-button">Zrušit</button>
+        </div>
+
+        <div id="modalMessage"></div>
+    </div>
+</div>
+
+    
 <script>
+    function openDiplomaForm() {
+    document.getElementById('diplomaModal').classList.remove('hidden');
+}
+
+function closeDiplomaForm() {
+    document.getElementById('diplomaModal').classList.add('hidden');
+    document.getElementById('modalMessage').innerText = '';
+}
+
+async function submitDiploma() {
+    const email = document.getElementById('emailInput').value.trim();
+
+    if (!email || !email.includes('@')) {
+        document.getElementById('modalMessage').innerText = 'Zadej platný e-mail';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('id', currentAgent.id);
+    formData.append('name', currentAgent.name);
+    formData.append('email', email);
+
+    try {
+        const response = await fetch('send_diploma.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) throw new Error();
+
+        document.getElementById('modalMessage').innerText =
+            'Diplom byl odeslán na e-mail.';
+    } catch {
+        document.getElementById('modalMessage').innerText =
+            'Chyba při odesílání diplomu.';
+    }
+}
+
+    
 const API_URL = 'https://lukas.regularspace.com/agenti/ab_Agent.php';
 let currentAgent = null;
 
@@ -106,7 +162,7 @@ function renderPage() {
         ${allMissionsCompleted() ? `
             <div style="text-align:center; margin-top:20px;">
                 <button onclick="downloadDiploma()" class="download-button">
-                    📜 Stáhnout diplom
+                    📜 Získat diplom
                 </button>
             </div>
         ` : ''}
@@ -173,5 +229,6 @@ function showError(message) {
 
 </body>
 </html>
+
 
 
