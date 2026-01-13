@@ -161,9 +161,10 @@ function renderPage() {
 
         ${allMissionsCompleted() ? `
             <div style="text-align:center; margin-top:20px;">
-                <button onclick="downloadDiploma()" class="download-button">
-                    📜 Získat diplom
-                </button>
+                <button onclick="openDiplomaForm()" class="download-button">
+    📜 Získat diplom
+</button>
+
             </div>
         ` : ''}
     `;
@@ -229,6 +230,7 @@ function showError(message) {
 
 </body>
 </html>
+
 
 
 
