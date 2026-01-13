@@ -61,15 +61,23 @@ async function submitDiploma() {
             body: formData
         });
 
-        if (!response.ok) throw new Error();
+        const result = await response.json(); // očekáváme JSON s "status": "ok"
 
-        document.getElementById('modalMessage').innerText =
-            'Diplom byl odeslán na e-mail.';
-    } catch {
+        if (result.status === 'ok') {
+            document.getElementById('modalMessage').innerText =
+                'Diplom byl odeslán na e-mail.';
+        } else {
+            document.getElementById('modalMessage').innerText =
+                'Chyba při odesílání diplomu: ' + (result.message || '');
+        }
+
+    } catch (e) {
+        console.error(e);
         document.getElementById('modalMessage').innerText =
             'Chyba při odesílání diplomu.';
     }
 }
+
 
     
 const API_URL = 'https://lukas.regularspace.com/agenti/ab_Agent.php';
@@ -230,6 +238,7 @@ function showError(message) {
 
 </body>
 </html>
+
 
 
 
