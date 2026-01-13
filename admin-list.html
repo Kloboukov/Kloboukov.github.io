@@ -45,7 +45,7 @@
                     item.style.cursor = "pointer";
                     item.style.padding = "8px";
                     item.style.borderBottom = "1px solid #444";
-                    item.textContent = `AGENT ${String(agent.number).padStart(3,"0")} – ${agent.Agent_name}`;
+                    item.textContent = `AGENT ${String(agent.Agent_ID).padStart(3,"0")} – ${agent.Agent_name}`;
 
                     item.onclick = () => {
                         window.location.href = `admin-agent.html?id=${agent.Agent_ID}`;
@@ -77,4 +77,5 @@
     </div>
 </body>
 </html>
+
 
